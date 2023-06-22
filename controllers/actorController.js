@@ -5,7 +5,7 @@ class ActorController {
     this.actorRepository = new ActorRepository();
   }
 
-  getAll(req, res) {
+  getAll(req, res, next) {
     this.actorRepository.getAll(this.actorRepository.tableName, (err, result) => {
       if (err) {
         console.error(err);
@@ -18,7 +18,7 @@ class ActorController {
     });
   }
 
-  getById(req, res) {
+  getById(req, res, next) {
     const actorId = req.params.id;
 
     this.actorRepository.getById(this.actorRepository.tableName, actorId, (err, result) => {
@@ -38,22 +38,40 @@ class ActorController {
     });
   }
 
-  create(req, res) {
-    const actorData = req.body;
+  create(req, res, next) {
+    try {
+      const actorData = req.body;
+      const requiredFields = ['first_name', 'last_name', 'date_of_birth'];
+      const missingFields = [];
 
-    this.actorRepository.create(this.actorRepository.tableName, actorData, (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal server error' });
+      for (const field of requiredFields) {
+        if (!actorData[field]) {
+          missingFields.push(field);
+        }
       }
-      res.status(200).json({
-        message: 'success',
-        data: result,
+  
+      if (missingFields.length > 0) {
+        const errorMessage = `Missing required fields: ${missingFields.join(', ')}`;
+        return res.status(400).json({ error: errorMessage });
+      }
+  
+      this.actorRepository.create(this.actorRepository.tableName, actorData, (err, result) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: 'Internal server error' });
+        }
+        res.status(200).json({
+          message: 'success',
+          data: result,
+        });
       });
-    });
-  }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }  
 
-  update(req, res) {
+  update(req, res, next) {
     const actorId = req.params.id;
     const actorData = req.body;
     actorData.id = actorId;
@@ -74,7 +92,7 @@ class ActorController {
     });
   }
 
-  delete(req, res) {
+  delete(req, res, next) {
     const actorId = req.params.id;
 
     this.actorRepository.delete(this.actorRepository.tableName, actorId, (err, result) => {

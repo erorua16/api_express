@@ -58,7 +58,8 @@ class BaseRepository {
       }          
   
     delete(tableName, id, callback) {
-        db.run(`DELETE FROM ${tableName} WHERE id = ?`, id, function (err) {
+        const params = [id];
+        db.run(`DELETE FROM ${tableName} WHERE id = ?`, params, function (err) {
         if (err) {
             callback(err);
             return;
@@ -66,8 +67,9 @@ class BaseRepository {
         callback(null, {
             deletedID: this.changes,
         });
-        });
-    }
+    });
+}
+
   
   }
 

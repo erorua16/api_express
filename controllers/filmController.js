@@ -5,7 +5,7 @@ class FilmController {
     this.filmRepository = new FilmRepository();
   }
 
-  getAll(req, res) {
+  getAll(req, res, next) {
     this.filmRepository.getAllWithGenreAndActors((err, result) => {
       if (err) {
         console.error(err);
@@ -18,7 +18,7 @@ class FilmController {
     });
   }
 
-  getById(req, res) {
+  getById(req, res, next) {
     const filmId = req.params.id;
 
     this.filmRepository.getByIdWithGenreAndActors(filmId, (err, result) => {
@@ -38,7 +38,7 @@ class FilmController {
     });
   }
 
-  create(req, res) {
+  create(req, res, next) {
     const filmData = req.body;
 
     this.filmRepository.createWithGenreAndActors(filmData, (err, result) => {
@@ -56,7 +56,7 @@ class FilmController {
     });
   }
 
-  update(req, res) {
+  update(req, res, next) {
     const filmId = req.params.id;
     const filmData = req.body;
     filmData.id = filmId;
@@ -76,24 +76,26 @@ class FilmController {
     });
   }
 
-  delete(req, res) {
+  delete(req, res, next) {
     const filmId = req.params.id;
-
-    this.filmRepository.delete(filmId, (err, result) => {
+  
+    this.filmRepository.delete(this.filmRepository.tableName, filmId, (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).json({ error: 'Internal server error' });
       }
-
+  
       if (result.deletedID === 0) {
         return res.status(404).json({ error: 'Film not found' });
       }
+      
       res.status(200).json({
         message: 'success',
         deletedID: result.deletedID,
       });
     });
   }
+  
 }
 
 module.exports = FilmController;
