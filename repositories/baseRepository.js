@@ -29,7 +29,7 @@ class BaseRepository {
         const sql = `INSERT INTO ${tableName} (${columnNames}) VALUES (${placeholders})`;
         const params = Object.values(data);
         
-        db.run(sql, params, function (err) {
+        db.run(sql, params, (err) => {
             if (err) {
             callback(err);
             return;
@@ -46,7 +46,7 @@ class BaseRepository {
         
         const sql = `UPDATE ${tableName} SET ${columnNames} WHERE id = ?`;
         
-        db.run(sql, params, function (err) {
+        db.run(sql, params, (err) => {
           if (err) {
             callback(err);
             return;
@@ -59,7 +59,7 @@ class BaseRepository {
   
     delete(tableName, id, callback) {
         const params = [id];
-        db.run(`DELETE FROM ${tableName} WHERE id = ?`, params, function (err) {
+        db.run(`DELETE FROM ${tableName} WHERE id = ?`, params, (err) => {
         if (err) {
             callback(err);
             return;

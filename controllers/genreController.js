@@ -28,7 +28,7 @@ class GenresController {
         return;
       }
       const query = 'INSERT INTO genres (name) VALUES (?)';
-      db.run(query, [name], function (err) {
+      db.run(query, [name], (err) => {
         if (err) {
           console.error('Error creating genre:', err);
           res.status(500).json({ error: 'Internal server error' });
@@ -63,7 +63,7 @@ class GenresController {
           return;
         }
         const deleteQuery = 'DELETE FROM genres WHERE id = ?';
-        db.run(deleteQuery, [id], function (err) {
+        db.run(deleteQuery, [id], (err) => {
           if (err) {
             console.error('Error deleting genre:', err);
             res.status(500).json({ error: 'Internal server error' });

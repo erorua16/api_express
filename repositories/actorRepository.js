@@ -26,7 +26,7 @@ class ActorRepository extends BaseRepository {
       }
 
       // Delete the actor from the actors table
-      db.run(`DELETE FROM ${tableName} WHERE id = ?`, params, function (err) {
+      db.run(`DELETE FROM ${tableName} WHERE id = ?`, params, (err) => {
         if (err) {
           callback(err);
           return;
@@ -35,7 +35,7 @@ class ActorRepository extends BaseRepository {
         const deletedID = this.changes;
 
         // Delete the corresponding records from films_actors table
-        db.run(`DELETE FROM films_actors WHERE actor_id = ?`, params, function (err) {
+        db.run(`DELETE FROM films_actors WHERE actor_id = ?`, params, (err) => {
           if (err) {
             callback(err);
             return;

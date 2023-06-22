@@ -63,7 +63,7 @@ class FilmRepository extends BaseRepository {
         return;
       }
       if (!row) {
-        callback(null, null);
+        callback("no films");
         return;
       }
   
@@ -139,7 +139,7 @@ class FilmRepository extends BaseRepository {
 
         const placeholders = associations.map(() => '(?, ?)').join(', ');
         const values = associations.reduce((acc, curr) => [...acc, curr.film_id, curr.actor_id], []);
-        db.run(`INSERT INTO films_actors (film_id, actor_id) VALUES ${placeholders}`, values, function (err) {
+        db.run(`INSERT INTO films_actors (film_id, actor_id) VALUES ${placeholders}`, values, (err) => {
             if (err) {
                 callback(err);
                 return;
@@ -201,7 +201,7 @@ class FilmRepository extends BaseRepository {
         });
       }
   
-      function updateFilm() {
+     const updateFilm = () => {
         if (updateFields.length === 0) {
           // No film fields to update
           updateActors();
@@ -220,7 +220,7 @@ class FilmRepository extends BaseRepository {
         });
       }
   
-      function updateActors() {
+        const updateActors = () => {
         if (!actorIds || actorIds.length === 0) {
           // No actor updates required
           callback(null, filmRow);
@@ -255,7 +255,7 @@ class FilmRepository extends BaseRepository {
   
             const placeholders = associations.map(() => '(?, ?)').join(', ');
             const values = associations.reduce((acc, curr) => [...acc, curr.film_id, curr.actor_id], []);
-            db.run(`INSERT INTO films_actors (film_id, actor_id) VALUES ${placeholders}`, values, function (err) {
+            db.run(`INSERT INTO films_actors (film_id, actor_id) VALUES ${placeholders}`, values, (err) => {
               if (err) {
                 callback(err);
                 return;
@@ -265,8 +265,7 @@ class FilmRepository extends BaseRepository {
           });
         });
       }
-  
-      // Call the updateFilm function if genreId is not provided
+
       if (!genreId) {
         updateFilm();
       }
