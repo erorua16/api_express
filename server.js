@@ -1,10 +1,16 @@
 //Imports
 const db = require('./database');
 require('dotenv').config({silent: true})
-//Genres
+///tables///
+//genre
 const GenresController = require('./controllers/genreController');
 const genresController = new GenresController();
 const genreRouter = require('./routers/genreRouter');
+//actor
+const ActorController = require('./controllers/actorController');
+const actorController = new ActorController();
+const actorRouter = require('./routers/actorRouter');
+//
 //Defined vars
 const express = require("express");
 var app = express();
@@ -35,6 +41,7 @@ app.use((req, res, next) => {
 
 //Routes
 app.use('/genre', genreRouter);
+app.use('/actor', actorRouter);
 
 
 const HTTP_PORT = 8000

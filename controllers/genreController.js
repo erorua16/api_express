@@ -4,31 +4,16 @@ class GenresController {
     constructor() {
       this.genresRepository = new GenresRepository();
     }
-  
-    getById(req, res, next) {
-      const id = req.params.id;
-      this.genresRepository.getById(this.genresRepository.tableName, id, (err, row) => {
-        if (err) {
-          res.status(400).json({ error: err.message });
-          return;
-        }
-        res.status(200).json({
-          message: 'success',
-          data: row,
-          id: req.params.id,
-        });
-      });
-    }
-  
+
     getAll(req, res, next) {
-      this.genresRepository.getAll(this.genresRepository.tableName, (err, rows) => {
+      this.genresRepository.getAll(this.genresRepository.tableName, (err, result) => {
         if (err) {
-          res.status(400).json({ error: err.message });
+          res.status(500).json({ error: 'Internal server error' });
           return;
         }
         res.status(200).json({
           message: 'success',
-          data: rows,
+          data: result,
         });
       });
     }
@@ -39,7 +24,7 @@ class GenresController {
       };
       this.genresRepository.create(this.genresRepository.tableName, data, (err, result) => {
         if (err) {
-          res.status(400).json({ error: err.message });
+          res.status(500).json({ error: 'Internal server error' });
           return;
         }
         res.status(200).json({
@@ -49,25 +34,11 @@ class GenresController {
       });
     }
   
-    update(req, res, next) {
-      const reqBody = req.body;
-      this.genresRepository.update(this.genresRepository.tableName, reqBody, (err, result) => {
-        if (err) {
-          res.status(400).json({ error: err.message });
-          return;
-        }
-        res.status(200).json({
-          message: 'success',
-          newData: result,
-        });
-      });
-    }
-  
     delete(req, res, next) {
       const id = req.params.id;
       this.genresRepository.delete(this.genresRepository.tableName, id, (err, result) => {
         if (err) {
-          res.status(400).json({ error: err.message });
+          res.status(500).json({ error: 'Internal server error' });
           return;
         }
         res.status(200).json({
