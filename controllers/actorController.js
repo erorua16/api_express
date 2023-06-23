@@ -121,8 +121,8 @@ class ActorController {
 
       this.actorRepository.delete(this.actorRepository.tableName, actorId, (err, result) => {
         if (err) {
-          if(err.message.includes("Record not found with id")){
-            return res.status(404).json({error : 'actor not found with specified id'})
+          if(err.message.includes("Actor not found")){
+            return res.status(404).json({error : 'Actor not found with specified id'})
           }
           console.error(err);
           return res.status(500).json({ error: 'Internal server error' });

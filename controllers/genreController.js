@@ -1,5 +1,5 @@
 const GenresRepository = require("../repositories/genreRepository");
-
+const db = require("../database");
 class GenresController {
   constructor() {
     this.genresRepository = new GenresRepository();
@@ -44,7 +44,7 @@ class GenresController {
 
         res.status(201).json({
           message: "success",
-          data: data,
+          data: req.body,
         });
       });
     } catch (error) {
@@ -74,6 +74,10 @@ class GenresController {
         }
         this.genresRepository.delete("genres", id, (err, result) => {
           if (err) {
+            if(err.message.includes("Record not found with id")){
+              res.status(404).json({ error: "Genre with specific id not found" });
+              return
+            }
             console.error("Error deleting genre:", err);
             res.status(500).json({ error: "Internal server error" });
             return;

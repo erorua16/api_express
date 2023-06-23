@@ -138,7 +138,6 @@ class BaseRepository {
 
       if (!recordExists) {
         const error = new Error(`Record not found with id: ${id}`);
-        error.status = 404;
         callback(error);
         return;
       }

@@ -28,10 +28,10 @@ class FilmController {
       const filmId = req.params.id;
 
       this.filmRepository.getByIdWithGenreAndActors(filmId, (err, result) => {
-        if (err == "no films") {
-          return res.status(404).json({ error: "Film not found" });
-        }
         if (err) {
+          if (err.message.includes("Film with the specified ID does not exist") ) {
+            return res.status(404).json({ error: "Film with the specified ID does not exist" });
+          }
           console.error(err);
           return res.status(500).json({ error: "Internal server error" });
         }
@@ -51,7 +51,7 @@ class FilmController {
   create(req, res, next) {
     try {
       const filmData = req.body;
-      const requiredFields = ["name", "synopsis", "genre_id"];
+      const requiredFields = ["name", "synopsis", "genre_id", "actor_ids"];
       const missingFields = [];
 
       for (const field of requiredFields) {
@@ -67,6 +67,9 @@ class FilmController {
         return res.status(400).json({ error: errorMessage });
       }
 
+      if(filmData.actor_ids.length == 0) {
+        return res.status(400).json({ error: "There needs to be at least one actor id"})
+      }
       this.filmRepository.createWithGenreAndActors(filmData, (err, result) => {
         if (err) {
           console.error(err);
@@ -121,6 +124,10 @@ class FilmController {
       const filmId = req.params.id;
       const filmData = req.body;
       filmData.id = filmId;
+
+      if(filmData.actor_ids.length == 0) {
+        return res.status(400).json({ error: "There needs to be at least one actor id"})
+      }
 
       this.filmRepository.updateWithGenreAndActors(filmData, (err, result) => {
         if (err) {

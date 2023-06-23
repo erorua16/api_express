@@ -60,7 +60,7 @@ class FilmRepository extends BaseRepository {
       GROUP BY f.id
     `;
     const params = [id];
-
+  
     db.get(sql, params, (err, row) => {
       if (err) {
         callback(err);
@@ -70,7 +70,7 @@ class FilmRepository extends BaseRepository {
         callback(new Error("Film with the specified ID does not exist."));
         return;
       }
-
+  
       const film = {
         id: row.id,
         name: row.name,
@@ -92,85 +92,109 @@ class FilmRepository extends BaseRepository {
             }))
           : [],
       };
-
+  
+      if (film.actors.length === 1) {
+        film.actors = film.actors[0]; // Set the single actor object directly instead of wrapping it in an array
+      }
+  
       callback(null, film);
     });
   }
+  
 
   createWithGenreAndActors(filmData, callback) {
-    const genreId = filmData.genre_id;
-    const actorIds = filmData.actor_ids;
-
-    // Check if genre exists
-    db.get("SELECT id FROM genres WHERE id = ?", [genreId], (err, genreRow) => {
+    const columnNames = Object.keys(filmData).join(", ") ;
+    const sql = `PRAGMA table_info(${this.tableName})`;
+    db.all(sql, [], (err, columns) => {
       if (err) {
         callback(err);
         return;
       }
-      if (!genreRow) {
-        callback(
-          new Error("Genre with the specified ID does not exist."),
-          null
-        );
+  
+      const allowedColumns = columns.map((column) => column.name.toLowerCase());
+      allowedColumns.push("actor_ids")
+  
+      const invalidColumns = columnNames
+        .split(", ")
+        .filter((key) => !allowedColumns.includes(key.toLowerCase()));
+  
+      if (invalidColumns.length > 0) {
+        const error = new Error(`Invalid columns: ${invalidColumns.join(", ")}`);
+        callback(error);
         return;
       }
-
-      // Check if all actors exist
-      const placeholders = actorIds.map(() => "?").join(", ");
-      const sql = `SELECT id FROM actors WHERE id IN (${placeholders})`;
-      db.all(sql, actorIds, (err, actorRows) => {
+  
+      const genreId = filmData.genre_id;
+      const actorIds = filmData.actor_ids;
+  
+      // Check if genre exists
+      db.get("SELECT id FROM genres WHERE id = ?", [genreId], (err, genreRow) => {
         if (err) {
           callback(err);
           return;
         }
-        if (actorIds.length !== actorRows.length) {
-          callback(
-            new Error(
-              "One or more actors with the specified IDs do not exist."
-            ),
-            null
-          );
+        if (!genreRow) {
+          callback(new Error("Genre with the specified ID does not exist."), null);
           return;
         }
-
-        // Create film
-        const film = {
-          name: filmData.name,
-          synopsis: filmData.synopsis,
-          release_year: filmData.release_year,
-          genre_id: genreId,
-        };
-        this.create(this.tableName, film, (err, result) => {
+  
+        // Check if all actors exist
+        const placeholders = actorIds.map(() => "?").join(", ");
+        const sql = `SELECT id FROM actors WHERE id IN (${placeholders})`;
+        db.all(sql, actorIds, (err, actorRows) => {
           if (err) {
             callback(err);
             return;
           }
-          const filmId = result.id;
-          const associations = actorIds.map((actorId) => ({
-            film_id: filmId,
-            actor_id: actorId,
-          }));
-
-          const placeholders = associations.map(() => "(?, ?)").join(", ");
-          const values = associations.reduce(
-            (acc, curr) => [...acc, curr.film_id, curr.actor_id],
-            []
-          );
-          db.run(
-            `INSERT INTO films_actors (film_id, actor_id) VALUES ${placeholders}`,
-            values,
-            (err) => {
-              if (err) {
-                callback(err);
-                return;
-              }
-              callback(null, result);
+          if (actorIds.length !== actorRows.length) {
+            callback(
+              new Error("One or more actors with the specified IDs do not exist."),
+              null
+            );
+            return;
+          }
+  
+          // Create film
+          const film = {
+            name: filmData.name,
+            synopsis: filmData.synopsis,
+            release_year: filmData.release_year,
+            genre_id: genreId,
+          };
+          this.create(this.tableName, film, (err, result) => {
+            if (err) {
+              callback(err);
+              return;
             }
-          );
+            const filmId = result.id;
+            const associations = actorIds.map((actorId) => ({
+              film_id: filmId,
+              actor_id: actorId,
+            }));
+  
+            const placeholders = associations.map(() => "(?, ?)").join(", ");
+            const values = associations.reduce(
+              (acc, curr) => [...acc, curr.film_id, curr.actor_id],
+              []
+            );
+            db.run(
+              `INSERT INTO films_actors (film_id, actor_id) VALUES ${placeholders}`,
+              values,
+              (err) => {
+                if (err) {
+                  callback(err);
+                  return;
+                }
+                callback(null, result);
+              }
+            );
+          });
         });
       });
     });
   }
+  
+  
 
   updateWithGenreAndActors(filmData, callback) {
     const filmId = filmData.id;
@@ -206,7 +230,7 @@ class FilmRepository extends BaseRepository {
       }
       if (genreId) {
         // Check if genre exists
-        this.getById(genres, genreId, (err, genreRow) => {
+        this.getById("genres", genreId, (err, genreRow) => {
           if (err) {
             callback(err);
             return;
@@ -249,6 +273,7 @@ class FilmRepository extends BaseRepository {
           const allowedColumns = columns.map((column) =>
             column.name.toLowerCase()
           );
+          allowedColumns.push("actor_ids")
           const invalidColumns = columnNames.filter(
             (key) => !allowedColumns.includes(key.toLowerCase())
           );

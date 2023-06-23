@@ -42,33 +42,38 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  const originalSend = res.send;
-  res.send = function (data) {
-    const jsonData = JSON.stringify(data);
-    const hash = crypto.createHash("md5").update(jsonData).digest("hex");
-    res.set("ETag", hash);
-    originalSend.apply(res, arguments);
-  };
+  if (req.method === "GET") {
+    const originalSend = res.send;
+    res.send = function (data) {
+      const jsonData = JSON.stringify(data);
+      const hash = crypto.createHash("md5").update(jsonData).digest("hex");
+      res.set("ETag", hash);
+      originalSend.apply(res, arguments);
+    };
+  }
   next();
 });
 
-app.use((req, res, next) => {
-  if (req.method === "PUT") {
-    const requestETag = req.headers["etag"];
-    const currentETag = res.get("ETag");
-
-    if(requestETag !== currentETag) {
-      return res.status(412).end()
-    }
-    if (requestETag && currentETag && requestETag === currentETag) {
-      res.status(304).end();
-    } else {
-      next();
-    }
-  } else {
-    next();
-  }
-});
+// app.use((req, res, next) => {
+//   if (req.method === "PUT") {
+//     console.log(req.originalUrl)
+//     const requestETag = req.headers["if-match"];
+//     next()
+//     console.log(requestETag)
+//   //   if(requestETag !== currentETag || !requestETag) {
+//   //     return res.status(412).json({
+//   //       message: 'precognition failed'
+//   //   })
+//   //   }
+//   //   if (requestETag && currentETag && requestETag === currentETag) {
+//   //     res.status(304).end();
+//   //   } else {
+//   //     next();
+//   //   }
+//   // } else {
+//   //   next();
+//   }
+// });
 
 // Routes
 app.use("/api/genre", genreRouter);
