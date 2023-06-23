@@ -1,4 +1,4 @@
-const ActorRepository = require('../repositories/actorRepository');
+const ActorRepository = require("../repositories/actorRepository");
 
 class ActorController {
   constructor() {
@@ -7,19 +7,22 @@ class ActorController {
 
   getAll(req, res, next) {
     try {
-      this.actorRepository.getAll(this.actorRepository.tableName, (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: 'Internal server error' });
+      this.actorRepository.getAll(
+        this.actorRepository.tableName,
+        (err, result) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Internal server error" });
+          }
+          res.status(200).json({
+            message: "success",
+            data: result,
+          });
         }
-        res.status(200).json({
-          message: 'success',
-          data: result,
-        });
-      });
+      );
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 
@@ -27,31 +30,35 @@ class ActorController {
     try {
       const actorId = req.params.id;
 
-      this.actorRepository.getById(this.actorRepository.tableName, actorId, (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: 'Internal server error' });
-        }
-        if (!result) {
-          return res.status(404).json({ error: 'Actor not found' });
-        }
+      this.actorRepository.getById(
+        this.actorRepository.tableName,
+        actorId,
+        (err, result) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Internal server error" });
+          }
+          if (!result) {
+            return res.status(404).json({ error: "Actor not found" });
+          }
 
-        res.status(200).json({
-          message: 'success',
-          data: result,
-          id: req.params.id,
-        });
-      });
+          res.status(200).json({
+            message: "success",
+            data: result,
+            id: req.params.id,
+          });
+        }
+      );
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 
   create(req, res, next) {
     try {
       const actorData = req.body;
-      const requiredFields = ['first_name', 'last_name', 'date_of_birth'];
+      const requiredFields = ["first_name", "last_name", "date_of_birth"];
       const missingFields = [];
 
       for (const field of requiredFields) {
@@ -61,23 +68,33 @@ class ActorController {
       }
 
       if (missingFields.length > 0) {
-        const errorMessage = `Missing required fields: ${missingFields.join(', ')}`;
+        const errorMessage = `Missing required fields: ${missingFields.join(
+          ", "
+        )}`;
         return res.status(400).json({ error: errorMessage });
       }
 
-      this.actorRepository.create(this.actorRepository.tableName, actorData, (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: 'Internal server error' });
+      this.actorRepository.create(
+        this.actorRepository.tableName,
+        actorData,
+        (err, result) => {
+          if (err) {
+            if (err.message.includes("Invalid columns")) {
+              res.status(422).json({ error: err.message });
+              return;
+            }
+            console.error(err);
+            return res.status(500).json({ error: "Internal server error" });
+          }
+          res.status(201).json({
+            message: "success",
+            data: actorData,
+          });
         }
-        res.status(201).json({
-          message: 'success',
-          data: actorData,
-        });
-      });
+      );
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 
@@ -87,23 +104,31 @@ class ActorController {
       const actorData = req.body;
       actorData.id = actorId;
 
-      this.actorRepository.update(this.actorRepository.tableName, actorData, (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: 'Internal server error' });
+      this.actorRepository.update(
+        this.actorRepository.tableName,
+        actorData,
+        (err, result) => {
+          if (err) {
+            if (err.message.includes("Record not found with id")) {
+              res.status(404).json({ error: "Actor not found" });
+              return;
+            }
+            if (err.message.includes("Invalid columns")) {
+              res.status(422).json({ error: err.message });
+              return;
+            }
+            console.error(err);
+            return res.status(500).json({ error: "Internal server error" });
+          }
+          res.status(200).json({
+            message: "success",
+            data: actorData,
+          });
         }
-
-        if (result.updatedID === 0) {
-          return res.status(404).json({ error: 'Actor not found' });
-        }
-        res.status(200).json({
-          message: 'success',
-          data: actorData,
-        });
-      });
+      );
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 
@@ -111,23 +136,29 @@ class ActorController {
     try {
       const actorId = req.params.id;
 
-      this.actorRepository.delete(this.actorRepository.tableName, actorId, (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: 'Internal server error' });
-        }
+      this.actorRepository.delete(
+        this.actorRepository.tableName,
+        actorId,
+        (err, result) => {
+          if (err) {
+            if (err.message.includes("Actor not found")) {
+              return res
+                .status(404)
+                .json({ error: "actor not found with specified id" });
+            }
+            console.error(err);
+            return res.status(500).json({ error: "Internal server error" });
+          }
 
-        if (result.deletedID === 0) {
-          return res.status(404).json({ error: 'Actor not found' });
+          res.status(200).json({
+            message: "success",
+            deletedID: result.deletedID,
+          });
         }
-        res.status(200).json({
-          message: 'success',
-          deletedID: result.deletedID,
-        });
-      });
+      );
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 }

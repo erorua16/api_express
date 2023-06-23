@@ -1,9 +1,9 @@
-const BaseRepository = require('./baseRepository');
-const db = require('../database');
+const BaseRepository = require("./baseRepository");
+const db = require("../database");
 class ActorRepository extends BaseRepository {
   constructor() {
     super();
-    this.tableName = 'actors';
+    this.tableName = "actors";
   }
 
   delete(tableName, id, callback) {
@@ -17,11 +17,8 @@ class ActorRepository extends BaseRepository {
       }
 
       if (!result) {
-        // Actor not found, return an error
-        callback(null, {
-          deletedID: 0,
-          error: 'Actor not found',
-        });
+        const error = new Error('Actor not found')
+        callback(error);
         return;
       }
 

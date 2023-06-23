@@ -1,12 +1,10 @@
-const BaseRepository = require('./baseRepository');
+const BaseRepository = require("./baseRepository");
 
 class GenresRepository extends BaseRepository {
-    constructor() {
-      super();
-      this.tableName = 'genres';
-    }
-  
+  constructor() {
+    super();
+    this.tableName = "genres";
   }
-  
+}
 
 module.exports = GenresRepository;
