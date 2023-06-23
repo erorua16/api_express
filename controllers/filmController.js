@@ -63,7 +63,7 @@ class FilmController {
         }
         res.status(201).json({
           message: 'success',
-          data: result,
+          data: filmData,
         });
       });
     } catch (error) {
@@ -88,7 +88,7 @@ class FilmController {
         }
         res.status(200).json({
           message: 'success',
-          data: result,
+          data: filmData,
         });
       });
     } catch (error) {

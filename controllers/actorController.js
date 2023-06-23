@@ -72,7 +72,7 @@ class ActorController {
         }
         res.status(201).json({
           message: 'success',
-          data: result,
+          data: actorData,
         });
       });
     } catch (error) {
@@ -98,7 +98,7 @@ class ActorController {
         }
         res.status(200).json({
           message: 'success',
-          data: result,
+          data: actorData,
         });
       });
     } catch (error) {

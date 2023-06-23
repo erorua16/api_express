@@ -1,9 +1,13 @@
-const db = require('../database');
+const GenresRepository = require('../repositories/genreRepository');
 
 class GenresController {
+  constructor() {
+    this.genresRepository = new GenresRepository();
+  }
+
   getAll(req, res, next) {
     try {
-      db.all('SELECT * FROM genres', (err, rows) => {
+      this.genresRepository.getAll('genres', (err, rows) => {
         if (err) {
           console.error('Error retrieving genres:', err);
           res.status(500).json({ error: 'Internal server error' });
@@ -27,8 +31,8 @@ class GenresController {
         res.status(400).json({ error: 'Genre name is required' });
         return;
       }
-      const query = 'INSERT INTO genres (name) VALUES (?)';
-      db.run(query, [name], (err) => {
+      const data = { name };
+      this.genresRepository.create('genres', data, (err, result) => {
         if (err) {
           console.error('Error creating genre:', err);
           res.status(500).json({ error: 'Internal server error' });
@@ -36,10 +40,7 @@ class GenresController {
         }
         res.status(201).json({
           message: 'success',
-          data: {
-            id: this.lastID,
-            name: name,
-          },
+          data: data,
         });
       });
     } catch (error) {
@@ -62,14 +63,13 @@ class GenresController {
           res.status(403).json({ error: 'Genre is used in one or more films' });
           return;
         }
-        const deleteQuery = 'DELETE FROM genres WHERE id = ?';
-        db.run(deleteQuery, [id], (err) => {
+        this.genresRepository.delete('genres', id, (err, result) => {
           if (err) {
             console.error('Error deleting genre:', err);
             res.status(500).json({ error: 'Internal server error' });
             return;
           }
-          if (this.changes === 0) {
+          if (result.deletedID === 0) {
             console.error('Genre not found for deletion');
             res.status(404).json({ error: 'Genre not found' });
             return;
